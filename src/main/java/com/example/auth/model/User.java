@@ -35,6 +35,15 @@ public class User {
     @Column(nullable = false)
     private Boolean enabled = true;
 
+    @Column(nullable = false)
+    private Boolean emailVerified = false;
+
+    @Column(nullable = false)
+    private Boolean phoneVerified = false;
+
+    @Column
+    private Long telegramChatId;
+
     @Column(name = "token_version", nullable = false)
     private Long tokenVersion = 0L;
 

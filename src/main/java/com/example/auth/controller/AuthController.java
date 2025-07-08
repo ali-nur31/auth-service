@@ -4,30 +4,37 @@ import com.example.auth.dto.GenericResponse;
 import com.example.auth.dto.LoginRequest;
 import com.example.auth.dto.LoginResponse;
 import com.example.auth.dto.RegisterRequest;
-import com.example.auth.service.AuthService;
+import com.example.auth.service.KeycloakAdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthService authService;
+    private final KeycloakAdminService keycloakAdminService;
 
     @PostMapping("/register")
-    public ResponseEntity<GenericResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest));
+    public Mono<GenericResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        return keycloakAdminService.createUser(registerRequest)
+                .thenReturn(new GenericResponse("User registered, verify email"));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok(authService.login(loginRequest));
+    public Mono<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return keycloakAdminService.loginUser(loginRequest);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@RequestHeader("X-Refresh-Token") String oldToken) {
-        return ResponseEntity.ok(authService.refresh(oldToken));
+    public Mono<LoginResponse> refresh(@RequestParam String refreshToken) {
+        return keycloakAdminService.validateRefreshToken(refreshToken);
+    }
+
+    @PostMapping("/logout")
+    public Mono<GenericResponse> logout(@RequestParam String refreshToken) {
+        return keycloakAdminService.logoutUser(refreshToken)
+                .thenReturn(new GenericResponse("User logged out successfully"));
     }
 }

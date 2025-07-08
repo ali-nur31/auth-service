@@ -1,35 +1,54 @@
 services:
-  app:
+  auth:
+    container_name: auth-service
     build: .
     env_file: .env
-    secrets:
-      - jwt_private
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      SPRING_PROFILES_ACTIVE: dev
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_started
+      keycloak:
+        condition: service_started
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:8080"
     restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: keycloak
+    command: start-dev --http-port ${KEYCLOAK_PORT}
+    environment:
+      KC_DB: postgres
+      KC_DB_USERNAME: ${POSTGRES_KEYCLOAK_USER}
+      KC_DB_PASSWORD: ${POSTGRES_KEYCLOAK_PASSWORD}
+      KC_DB_URL: jdbc:postgresql://keycloak-db:${POSTGRES_KEYCLOAK_PORT}/${POSTGRES_KEYCLOAK_DB}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "${KEYCLOAK_PORT}:8081"
+    depends_on:
+      keycloak-db:
+        condition: service_started
+
+  keycloak-db:
+    image: postgres:16
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_KEYCLOAK_DB}
+      POSTGRES_USER: ${POSTGRES_KEYCLOAK_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_KEYCLOAK_PASSWORD}
+    volumes: [ kcdata:/var/lib/postgresql/data ]
+
   postgres:
     image: postgres:16
-    container_name: auth_postgres
+    container_name: auth-postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  redis:
-    image: redis:7
-    container_name: auth_redis
-    ports:
-      - "6379"
     restart: unless-stopped
 
   # Если понадобится локальный Kafka:
@@ -55,7 +74,4 @@ services:
 
 volumes:
   pgdata:
-
-secrets:
-  jwt_private:
-    file: ./secrets/jwt-private.pem
+  kcdata:
