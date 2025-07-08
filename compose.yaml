@@ -15,9 +15,8 @@ services:
     restart: unless-stopped
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0
+    image: quay.io/keycloak/keycloak:26.1.2
     container_name: keycloak
-    command: start-dev --http-port ${KEYCLOAK_PORT}
     environment:
       KC_DB: postgres
       KC_DB_USERNAME: ${POSTGRES_KEYCLOAK_USER}
@@ -25,6 +24,9 @@ services:
       KC_DB_URL: jdbc:postgresql://keycloak-db:${POSTGRES_KEYCLOAK_PORT}/${POSTGRES_KEYCLOAK_DB}
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./keycloak-providers:/opt/keycloak/providers
+    command: start-dev --http-port ${KEYCLOAK_PORT}
     ports:
       - "${KEYCLOAK_PORT}:8081"
     depends_on:

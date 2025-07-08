@@ -63,7 +63,7 @@ public class KeycloakAdminService {
         return webClient.post()
                 .uri("/realms/{realm}/protocol/openid-connect/token", realm)
                 .body(BodyInserters.fromFormData("grant_type", "password")
-                        .with("client_id", "spa-client")
+                        .with("client_id", "auth-service")
                         .with("username", loginRequest.getUsernameOrEmail())
                         .with("password", loginRequest.getPassword()))
                 .retrieve()
@@ -81,7 +81,7 @@ public class KeycloakAdminService {
         return webClient.post()
                 .uri("/realms/{realm}/protocol/openid-connect/token", realm)
                 .body(BodyInserters.fromFormData("grant_type", "refresh_token")
-                        .with("client_id", "spa-client")
+                        .with("client_id", "auth-service")
                         .with("refresh_token", refreshToken))
                 .retrieve()
                 .bodyToMono(JsonNode.class)
@@ -97,7 +97,7 @@ public class KeycloakAdminService {
     public Mono<Void> logoutUser(String refreshToken) {
         return webClient.post()
                 .uri("/realms/{realm}/protocol/openid-connect/logout", realm)
-                .body(BodyInserters.fromFormData("client_id", "spa-client")
+                .body(BodyInserters.fromFormData("client_id", "auth-service")
                         .with("refresh_token", refreshToken))
                 .retrieve().toBodilessEntity().then();
     }

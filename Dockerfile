@@ -18,4 +18,4 @@ EXPOSE $APP_PORT
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
-  CMD curl -f ${APP_DOMAIN:-localhost}:${APP_PORT:-8080}/actuator/health/readiness || exit 1
+  CMD curl -f ${APP_ADDRESS:-localhost}:${APP_PORT:-8080}/actuator/health/readiness || exit 1

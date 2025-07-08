@@ -1,6 +1,7 @@
 ALTER TABLE users
-    ADD COLUMN email_verified BOOLEAN NOT NULL DEFAULT FALSE;
-    ADD COLUMN phone_verified BOOLEAN NOT NULL DEFAULT FALSE;
+    ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN IF NOT EXISTS telegram_chat_id BIGINT;
 
 CREATE TABLE verification_tokens (
     id          SERIAL PRIMARY KEY,
@@ -12,4 +13,4 @@ CREATE TABLE verification_tokens (
     created_at  TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_verify_token ON verification_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_verify_token ON verification_tokens(token);

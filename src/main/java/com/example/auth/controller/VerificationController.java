@@ -19,7 +19,7 @@ public class VerificationController {
     private final UserRepository userRepository;
 
     @Value("${bot.username}")
-    private final String botUsername;
+    private String botUsername;
 
     @GetMapping("/email")
     public GenericResponse confirmEmail(@RequestParam String token) {
